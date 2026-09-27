@@ -22,6 +22,14 @@ if vim.fn.has("linux") == 1 then
     cache_enabled = 0,
   }
 end
+-- 默认 shell：Windows 下用 PowerShell 7 (pwsh)
+-- LazyVim 自带这个 helper，它会设置 vim.o.shell，并把 shellcmdflag/shellredir/
+-- shellpipe/shellquote 一并配好（UTF-8 输入输出、$PSStyle.OutputRendering=plaintext
+-- 去掉 ANSI 色码、exit $LastExitCode 保留退出码），所以 :! 和 system() 也能正确走 pwsh。
+if vim.fn.has("win32") == 1 then
+  LazyVim.terminal.setup("pwsh")
+end
+
 vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1
 vim.g.omni_sql_no_default_maps = 1

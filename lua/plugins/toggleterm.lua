@@ -67,6 +67,12 @@ return {
       return keys
     end,
     config = function()
+      -- 终端 shell 跟随 options.lua 里设置的 vim.o.shell（Windows 下为 pwsh）。
+      -- 注意：本 spec 用了自定义 config 函数，lazy.nvim 在这种情况下只会调用这里的
+      -- config，不会自动执行 require("toggleterm").setup(opts)，必须手动调。
+      -- 顺带带来的好处：注册 :ToggleTerm 等命令。
+      require("toggleterm").setup({ shell = vim.o.shell })
+
       vim.api.nvim_create_autocmd("TermOpen", {
         pattern = "term://*",
         callback = function()
