@@ -51,3 +51,30 @@ require("lazy").setup({
     },
   },
 })
+
+-- clangd 参数兜底。
+-- 原因：LazyVim 的 `lang.clangd` extra 比 `plugins/` 晚解析，而 lazy.nvim 合并 opts 时
+-- 对**列表是整份覆盖**（不是逐项合并），extra 里的 `servers.clangd.cmd` 会把
+-- plugins/lsp.lua 里写的那份整份顶掉。所以所有 spec 解析完（setup 返回时）、
+-- 插件还没加载前，在合并结果上再盖一次。
+-- 注意：这段依赖 lazy 内部结构，升级 lazy.nvim 后如果报错就直接删掉（只是让
+-- clangd 回退到 extra 的默认参数，不影响使用）。
+local function patch_clangd_cmd()
+  local ok, spec = pcall(require, "plugins.lsp")
+  if not ok or type(spec) ~= "table" then
+    return
+  end
+
+  local plugin = require("lazy.core.config").plugins["nvim-lspconfig"]
+  local cmd = spec.opts and spec.opts.servers and spec.opts.servers.clangd and spec.opts.servers.clangd.cmd
+  if not (plugin and cmd) then
+    return
+  end
+
+  local opts = require("lazy.core.plugin").values(plugin, "opts")
+  opts.servers = opts.servers or {}
+  opts.servers.clangd = opts.servers.clangd or {}
+  opts.servers.clangd.cmd = cmd
+end
+
+patch_clangd_cmd()

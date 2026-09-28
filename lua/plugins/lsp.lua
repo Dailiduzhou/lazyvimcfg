@@ -1,17 +1,27 @@
+-- clangd 命令行。
+--
+-- 坑：LazyVim 的 `lang.clangd` extra 比你自己的 `plugins/` 晚解析，而 lazy.nvim 合并 opts
+-- 时对**列表是整份覆盖**（不是逐项合并），所以 extra 里那份 `servers.clangd.cmd` 会把你
+-- 这里写的整份顶掉。这里保持一份方便查看/修改，真正生效由 `config/lazy.lua` 末尾兑底。
+--
+-- 另外 `--function-arg-placeholders` 在新版 clangd（≥18）必须带值，
+-- 只写参数名会报 `invalid value`（功能上会回退到默认值，但日志会脏）。
+local CLANGD_CMD = {
+  "clangd",
+  "--background-index",
+  "--clang-tidy",
+  "--header-insertion=iwyu",
+  "--completion-style=detailed",
+  "--function-arg-placeholders=true",
+  "--fallback-style=LLVM",
+}
+
 return {
   "neovim/nvim-lspconfig",
   opts = {
     servers = {
       clangd = {
-        cmd = {
-          "clangd",
-          "--background-index",
-          "--clang-tidy",
-          "--header-insertion=iwyu",
-          "--completion-style=detailed",
-          "--function-arg-placeholders",
-          "--fallback-style=LLVM",
-        },
+        cmd = CLANGD_CMD,
       },
     },
   },
